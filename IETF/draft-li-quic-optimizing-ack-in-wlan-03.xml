@@ -20,7 +20,7 @@
 <?rfc sortrefs="yes"?>
 <?rfc compact="no"?>
 <?rfc subcompact="no" ?>
-<rfc category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-03">
+<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-03">
   <front>
     <title abbrev="Optimizing ACK in QUIC">Optimizing ACK mechanism for QUIC</title>
     <author fullname="Tong Li" initials="T."  surname="Li">
