@@ -20,19 +20,19 @@
 <?rfc sortrefs="yes"?>
 <?rfc compact="no"?>
 <?rfc subcompact="no" ?>
-<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-03">
+<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-04">
   <front>
     <title abbrev="Optimizing ACK in QUIC">Optimizing ACK mechanism for QUIC</title>
     <author fullname="Tong Li" initials="T."  surname="Li">
-      <organization>Huawei</organization>
+      <organization>Renmin University of China</organization>
       <address>
         <postal>
-          <street>D2-03,Huawei Industrial Base</street>
-          <street>Longgang District</street>
-		  <street>Shenzhen</street>
+          <street>Room 421, Information Building, Renmin University of China</street>
+          <street>Haidian District</street>
+		  <street>Beijing</street>
           <street>China</street>
         </postal>
-        <email>li.tong@huawei.com</email>
+        <email>tong.li@ruc.edu.cn</email>
       </address>
     </author>
 
@@ -74,7 +74,7 @@
       </address>
     </author>
 
-    <date day="22" month="November" year="2021"/>
+    <date day="12" month="May" year="2022"/>
     <area>tsv</area>
     <workgroup>QUIC</workgroup>
  
@@ -90,7 +90,7 @@
     </section>
 
     <section title="Problem Statement">
-	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgement. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/> </t>   	
+	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, Metaverse, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgment. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/> </t>   	
 	</section>
 	
 	<section title="Overview of Standards on ACK Mechanism">
@@ -102,7 +102,9 @@
 
       <t>Instead of pulling more ACKs, <xref target="QUIC-SCALING" format="default"/> recommended that reducing the ACK frequency by sending an ACK for at least every 10 received packets and <xref target="QUIC-SATCOM" format="default"/> recommended an ACK frequency of four ACKs every round-trip time (RTT), aiming to reduce link transmission costs for asymmetric paths.</t>   
 
-      <t>Different from using an empirical value of ACK frequency, instead, this draft aims to improve the scalability by proposing the Tame ACK (TACK), whose frequency is a function of bandwidth-delay product of network connections. <xref target="IYENGAR-ACK" format="default"/> has proposed an extension of sender controlled ACK-FREQUENCY frame for QUIC, which is possible to be reused to help the sender sync the dynamically adjusted TACK frequency with the receiver in this case.</t>    
+      <t>Different from using an empirical value of ACK frequency, instead, we try to improve the scalability by proposing a novel ACK mechanism named Tame ACK (TACK), whose frequency is a function of bandwidth-delay product of network connections. The detailed TCP-based implementation (i.e., TCP-TACK) details and evaluation results have been shown in our prior work <xref target="Tong" format="default"/>. TCP-based implementation depends on the middleboxes to permit the extended-option-packets through, which might limit applicable scenarios. While QUIC is a flexible framework of transport protocol that uses UDP as a substrate to avoid requiring changes to legacy operating systems and middleboxes, and encrypts most of the packets including ACKs to avoid incurring a dependency on middleboxes. Hence, this draft focuses on applying TACK to optimize the ACK mechanism for QUIC.</t>
+	  
+	  <t>It is worth noting that <xref target="IYENGAR-ACK" format="default"/> has proposed an extension of sender controlled ACK-FREQUENCY frame for QUIC, which is possible to be reused to help the sender sync the dynamically adjusted TACK frequency with the receiver in this case.</t>    
 
 	</section>
 	
@@ -126,7 +128,7 @@
 			 <t>Where alpha is the time interval between two ACKs and is a function of RTT. However, when bw is extremely low, the ACK intensity is always as high as that in the case of a high throughput. In other words, the intensity of periodic ACK is unadaptable to bandwidth change, which wastes resources.</t>
 
 
-			 <t>Combining these two ways, the minimum ACK intensity in a QUIC connection can be set as f_quic = min{f_b,f_pack}. Through Equations (1) and (2), we have</t> 
+			 <t>Following the design of TACK <xref target="Tong" format="default"/>, we combine the above two ways, and set the minimum ACK intensity in a QUIC connection as f_quic = min{f_b,f_pack}. Through Equations (1) and (2), we have</t> 
 
 			 <t>f_quic = min{bw/(L*max_packet_size), 1/alpha} (3)</t>
 
@@ -136,7 +138,7 @@
 			 <t>f_quic = min{bw/(L*max_packet_size), beta/RTTmin} (4)</t>
 
 
-			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected.  Sara Landstrom et al. has given a lower bound of beta in [Sara],   i.e., beta >= 2.  An upper bound of L can also be derived according   to the loss rate on the data path (plr_data) and the ack path   (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack), where feedback_info denotes the amount of information carried by an ACK</t>
+			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected. Sara Landstrom et al. has given a lower bound of beta in [Sara], i.e., beta >= 2. We have further given an upper bound of L, which can be derived according to the loss rate on the data path (plr_data) and the ack path   (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack). Where feedback_info denotes the amount of information carried by an ACK. Please refer to <xref target="Tong" format="default"/> for more details.</t>
 
 			 <t>Qualitatively, periodic ACK is applied when bandwidth-delay product (bdp) is large (i.e., bdp >= beta*L* max_packet_size), and byte-counting ACK is applied when bdp is small (i.e., bdp &lt; beta*L* max_packet_size).</t>
 
@@ -300,6 +302,24 @@
         </front>
         <seriesInfo name="ACM SIGCOMM CCR" value="37(3):5-16"/>		
 	  </reference>
+	  
+	  <reference anchor="Tong">
+	    <front>
+	  	  
+		  <title>TACK: Improving Wireless Transport Performance by Taming Acknowledgments</title>
+          
+		  <author fullname="Tong Li"><organization /></author>
+		  <author fullname="Kai Zheng"><organization /></author>
+		  <author fullname="Ke Xu"><organization /></author>
+		  <author fullname="Rahul Arvind Jadhav"><organization /></author>		  
+		  <author fullname="Tao Xiong"><organization /></author>
+		  <author fullname="Keith Winstein"><organization /></author>
+		  <author fullname="Kun Tan"><organization /></author>
+          
+		  <date year="2020" />
+        </front>
+        <seriesInfo name="ACM SIGCOMM" value="2020:15-30"/>		
+	  </reference>
 
 	  <reference anchor="Neal">
 	    <front>
@@ -385,7 +405,7 @@
 
         	<reference anchor="IYENGAR-ACK">
           <front>
-            <title>Sender Control of Acknowledgement Delays in QUIC</title>           
+            <title>Sender Control of acknowledgment Delays in QUIC</title>           
             <author initials="J." surname="Iyengar" fullname="Jana Iyengar" role="editor">
               <organization>Fastly</organization>
             </author>
