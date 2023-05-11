@@ -20,7 +20,7 @@
 <?rfc sortrefs="yes"?>
 <?rfc compact="no"?>
 <?rfc subcompact="no" ?>
-<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-05">
+<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-06">
   <front>
     <title abbrev="Optimizing ACK in QUIC">Optimizing ACK mechanism for QUIC</title>
     <author fullname="Tong Li" initials="T."  surname="Li">
@@ -74,7 +74,7 @@
       </address>
     </author>
 
-    <date day="8" month="November" year="2022"/>
+    <date day="11" month="May" year="2023"/>
     <area>tsv</area>
     <workgroup>QUIC</workgroup>
  
@@ -90,7 +90,7 @@
     </section>
 
     <section title="Problem Statement">
-	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, Metaverse, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgment. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/> </t>   	
+	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, Metaverse, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgment. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/>. </t>   	
 	</section>
 	
 	<section title="Overview of Standards on ACK Mechanism">
@@ -102,7 +102,7 @@
 
       <t>Instead of pulling more ACKs, <xref target="QUIC-SCALING" format="default"/> recommended that reducing the ACK frequency by sending an ACK for at least every 10 received packets and <xref target="QUIC-SATCOM" format="default"/> recommended an ACK frequency of four ACKs every round-trip time (RTT), aiming to reduce link transmission costs for asymmetric paths.</t>   
 
-      <t>Different from using an empirical value of ACK frequency, instead, we try to improve the scalability by proposing a novel ACK mechanism named Tame ACK (TACK), whose frequency is a function of bandwidth-delay product of network connections. The detailed TCP-based implementation (i.e., TCP-TACK) details and evaluation results have been shown in our prior work <xref target="Tong" format="default"/>. TCP-based implementation depends on the middleboxes to permit the extended-option-packets through, which might limit applicable scenarios. While QUIC is a flexible framework of transport protocol that uses UDP as a substrate to avoid requiring changes to legacy operating systems and middleboxes, and encrypts most of the packets including ACKs to avoid incurring a dependency on middleboxes. Hence, this draft focuses on applying TACK to optimize the ACK mechanism for QUIC.</t>
+      <t>Different from using an empirical value of ACK frequency, instead, we try to improve the scalability by proposing a novel ACK mechanism named Tame ACK (TACK), whose frequency is a function of bandwidth-delay product of network connections. The detailed TCP-based implementation (i.e., TCP-TACK) details and evaluation results have been shown in <xref target="Tong" format="default"/>. TCP-based implementation depends on the middleboxes to permit the extended-option-packets through, which might limit applicable scenarios. While QUIC is a flexible framework of transport protocol that uses UDP as a substrate to avoid requiring changes to legacy operating systems and middleboxes, and encrypts most of the packets including ACKs to avoid incurring a dependency on middleboxes. Hence, this draft focuses on applying TACK to optimize the ACK mechanism for QUIC.</t>
 	  
 	  <t>It is worth noting that <xref target="IYENGAR-ACK" format="default"/> has proposed an extension of sender controlled ACK-FREQUENCY frame for QUIC, which is possible to be reused to help the sender sync the dynamically adjusted TACK frequency with the receiver in this case.</t>    
 
@@ -138,7 +138,7 @@
 			 <t>f_quic = min{bw/(L*max_packet_size), beta/RTTmin} (4)</t>
 
 
-			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected. Sara Landstrom et al. has given a lower bound of beta in [Sara], i.e., beta >= 2. We have further given an upper bound of L, which can be derived according to the loss rate on the data path (plr_data) and the ack path   (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack). Where feedback_info denotes the amount of information carried by an ACK. The detailed derivation can be refered in <xref target="Tong" format="default"/>.</t>
+			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected. Sara Landstrom et al. has given a lower bound of beta in <xref target="Sara" format="default"/>, i.e., beta >= 2. We have further given an upper bound of L, which can be derived according to the loss rate on the data path (plr_data) and the ack path   (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack). Where feedback_info denotes the amount of information carried by an ACK. The detailed derivation can be refered in <xref target="Tong" format="default"/>.</t>
 
 			 <t>Qualitatively, periodic ACK is applied when bandwidth-delay product (bdp) is large (i.e., bdp >= beta*L* max_packet_size), and byte-counting ACK is applied when bdp is small (i.e., bdp &lt; beta*L* max_packet_size).</t>
 
@@ -146,7 +146,7 @@
 
              <t>SWNDmin = beta*bdp/(beta-1) (5)</t>
 
-             <t>Ideally, the bottleneck buffer requirement is decided by the minimum send window, i.e., SWNDmin - bdp.  Since doubling the ACK frequency reduces the bottleneck buffer requirement substantially from 1 bdp to 0.33 bdp, beta = 4 is RECOMMENDED to provide redundancy [Sara], being more robust in practice.</t>
+             <t>Ideally, the bottleneck buffer requirement is decided by the minimum send window, i.e., SWNDmin - bdp.  Since doubling the ACK frequency reduces the bottleneck buffer requirement substantially from 1 bdp to 0.33 bdp, beta = 4 is RECOMMENDED to provide redundancy <xref target="Sara" format="default"/>, being more robust in practice.</t>
 	     </section>
 	
 
@@ -170,7 +170,7 @@
 
             <t> The sender therefore computes an RTT sample according to delta_t, t_1, and the arrival time (t_2) of the ACK frame, i.e., RTT_sample = t_2 − t_1 − delta_t. Measuring delta_t at the receiver assures an explicit correction for a more accurate RTT estimate. RTT samples SHOULD be smoothed using exponentially weighted moving average (EWMA) as specified in <xref target="RFC6298"/>. The sender then computes the RTTmin according to these RTT samples during a period of time.</t>
 
-             <t>The bw estimation can be acquired in a similar manner to BBR [Neal]. Since minimizing the ACK intensity induces excessive ACK delay, the value of bw may be the average value over a long period of time. However, the biases introduced in ACK intensity computation is limited.</t>
+             <t>The bw estimation can be acquired in a similar manner to BBR <xref target="Neal" format="default"/>. Since minimizing the ACK intensity induces excessive ACK delay, the value of bw may be the average value over a long period of time. However, the biases introduced in ACK intensity computation is limited.</t>
 
              <t>After computing the f_quic, the sender periodically syncs it to the receiver to update the intensity of ACK Frame by sending a new ACK-INTENSITY frame. </t>
 		 
@@ -228,7 +228,8 @@
 				 <t>Sequence Number: A variable-length integer indicating the sequence number assigned to the ACK-INTENSITY frame by the sender.</t>
                  <t>ACK Intensity: A variable-length integer indicating the updated f_quic calculated by the sender.</t>
                  <t>ACK-INTENSITY frames are ack-eliciting. However, their loss does not require retransmission.</t>              
-				 <t>Multiple ACK-INTENSITY frames SHOULD be generated by the sender during a connection to notify the receiver the variation of ACK intensity requirement under network dynamics.</t>	     	
+				 <t>ACK-INTENSITY frames SHOULD be generated by the sender during a connection to notify the receiver the variation of ACK intensity requirement under network dynamics. In general, a sender MAY send an ACK-INTENSITY frame every 10 seconds (to handle route
+changes). </t>	     	
 	    </section>	
 
 			 <section title="TIMESTAMP Frame">
