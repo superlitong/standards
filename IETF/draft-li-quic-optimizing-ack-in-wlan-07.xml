@@ -20,7 +20,7 @@
 <?rfc sortrefs="yes"?>
 <?rfc compact="no"?>
 <?rfc subcompact="no" ?>
-<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-06">
+<rfc ipr='trust200902' category="exp" docName="draft-li-quic-optimizing-ack-in-wlan-07">
   <front>
     <title abbrev="Optimizing ACK in QUIC">Optimizing ACK mechanism for QUIC</title>
     <author fullname="Tong Li" initials="T."  surname="Li">
@@ -74,12 +74,12 @@
       </address>
     </author>
 
-    <date day="11" month="May" year="2023"/>
+    <date day="21" month="November" year="2023"/>
     <area>tsv</area>
     <workgroup>QUIC</workgroup>
  
     <abstract>
-      <t>The dependence on frequent acknowledgments (ACKs) is an artifact of current transport protocol designs rather than a fundamental requirement. This document analyzes the problems caused by contentions and collisions on wireless medium between data packets and ACKs in WLAN and it proposes an ACK mechanism that minimizes the intensity of ACK Frame in QUIC, improving the performance of transport layer connection.</t>
+      <t>The dependence on frequent acknowledgments (ACKs) is an artifact of current transport protocol designs rather than a fundamental requirement. This document analyzes the problems caused by contentions and collisions on the wireless medium between data packets and ACKs in WLAN and it proposes an ACK mechanism that minimizes the intensity of ACK Frame in QUIC, improving the performance of transport layer connection.</t>
     </abstract>
   </front>
 
@@ -90,7 +90,7 @@
     </section>
 
     <section title="Problem Statement">
-	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, Metaverse, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgment. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/>. </t>   	
+	    <t>High-throughput transport over wireless local area network (WLAN) becomes a demanding requirement with the emergence of 4K wireless projection, VR/AR-based interactive gaming, Metaverse, and more. However, the shared nature of the wireless medium induces contention between data transport and backward signaling, such as acknowledgment. ACKs share the same medium route with data packets, causing similar medium access overhead despite the much smaller size of the ACKs. Contentions and collisions, as well as the wasted wireless resources by ACKs, lead to a significant throughput decline on the data path. This draft follows the roadmap as depicted in <xref target="AOD" format="default"/>. </t>   	
 	</section>
 	
 	<section title="Overview of Standards on ACK Mechanism">
@@ -100,11 +100,11 @@
 
     	<t>First of all, <xref target="ACK-PULL" format="default"/> proposed the TCP ACK pull mechanism, which allows a sender to request the ACK for a data segment to be sent without additional delay by the receiver. This helps in some cases when the delayed ACKs degrade transport performance.</t>   
 
-      <t>Instead of pulling more ACKs, <xref target="QUIC-SCALING" format="default"/> recommended that reducing the ACK frequency by sending an ACK for at least every 10 received packets and <xref target="QUIC-SATCOM" format="default"/> recommended an ACK frequency of four ACKs every round-trip time (RTT), aiming to reduce link transmission costs for asymmetric paths.</t>   
+      <t>Instead of pulling more ACKs, <xref target="QUIC-SCALING" format="default"/> recommended reducing the ACK frequency by sending an ACK for at least every 10 received packets and <xref target="QUIC-SATCOM" format="default"/> recommended an ACK frequency of four ACKs every round-trip time (RTT), aiming to reduce link transmission costs for asymmetric paths.</t>   
 
-      <t>Different from using an empirical value of ACK frequency, instead, we try to improve the scalability by proposing a novel ACK mechanism named Tame ACK (TACK), whose frequency is a function of bandwidth-delay product of network connections. The detailed TCP-based implementation (i.e., TCP-TACK) details and evaluation results have been shown in <xref target="Tong" format="default"/>. TCP-based implementation depends on the middleboxes to permit the extended-option-packets through, which might limit applicable scenarios. While QUIC is a flexible framework of transport protocol that uses UDP as a substrate to avoid requiring changes to legacy operating systems and middleboxes, and encrypts most of the packets including ACKs to avoid incurring a dependency on middleboxes. Hence, this draft focuses on applying TACK to optimize the ACK mechanism for QUIC.</t>
+      <t>Different from using an empirical value of ACK frequency, instead, we try to improve the scalability by proposing a novel ACK mechanism named Tame ACK (TACK), whose frequency is a function of the bandwidth-delay product of network connections. The detailed TCP-based implementation (i.e., TCP-TACK) details and evaluation results have been shown in <xref target="Tong" format="default"/>. TCP-based implementation depends on the middleboxes to permit the extended-option packets through, which might limit applicable scenarios. QUIC is a flexible framework of the transport protocol that uses UDP as a substrate to avoid requiring changes to legacy operating systems and middleboxes and encrypts most of the packets including ACKs to avoid incurring a dependency on middleboxes. Hence, this draft focuses on applying TACK to optimize the ACK mechanism for QUIC.</t>
 	  
-	  <t>It is worth noting that <xref target="IYENGAR-ACK" format="default"/> has proposed an extension of sender controlled ACK-FREQUENCY frame for QUIC, which is possible to be reused to help the sender sync the dynamically adjusted TACK frequency with the receiver in this case.</t>    
+	  <t>It is worth noting that <xref target="IYENGAR-ACK" format="default"/> has proposed an extension of sender-controlled ACK-FREQUENCY frame for QUIC, which is possible to be reused to help the sender sync the dynamically adjusted TACK frequency with the receiver in this case.</t>    
 
 	</section>
 	
@@ -112,9 +112,9 @@
 	
 	     <section title="Reducing ACK intensity">
 		 
-		     <t>ACK intensity can be quantified by the unit of Hz, i.e., number of ACKs per second. Byte-counting ACK and periodic ACK are two fundamental ways to reduce ACK intensity on the transport layer.</t>
+		     <t>ACK intensity can be quantified by the unit of Hz, i.e., the number of ACKs per second. Byte-counting ACK and periodic ACK are two fundamental ways to reduce ACK intensity on the transport layer.</t>
 
-			 <t>1. Byte-counting ACK: ACK intensity is controlled by sending an ACK for every L (L >= 2) incoming full-sized packets, in which the packet size equals to the Max Packet Size (set in the max_packet_size parameter in QUIC). The intensity of byte-counting ACK (f_b) is proportional to data throughput (bw): </t>
+			 <t>1. Byte-counting ACK: ACK intensity is controlled by sending an ACK for every L (L >= 2) incoming full-sized packets, in which the packet size equals the Max Packet Size (set in the max_packet_size parameter in QUIC). The intensity of byte-counting ACK (f_b) is proportional to data throughput (bw): </t>
 
 			 <t>f_b = bw/L*max_packet_size (1)</t>
 
@@ -128,21 +128,21 @@
 			 <t>Where alpha is the time interval between two ACKs and is a function of RTT. However, when bw is extremely low, the ACK intensity is always as high as that in the case of a high throughput. In other words, the intensity of periodic ACK is unadaptable to bandwidth change, which wastes resources.</t>
 
 
-			 <t>Following the design of TACK <xref target="Tong" format="default"/>, we combine the above two ways, and set the minimum ACK intensity in a QUIC connection as f_quic = min{f_b,f_pack}. Through Equations (1) and (2), we have</t> 
+			 <t>Following the design of TACK <xref target="Tong" format="default"/>, we combine the above two ways and set the minimum ACK intensity in a QUIC connection as f_quic = min{f_b,f_pack}. Through Equations (1) and (2), we have</t> 
 
 			 <t>f_quic = min{bw/(L*max_packet_size), 1/alpha} (3)</t>
 
 
-			 <t>We set alpha = RTTmin/beta, which means sending beta ACKs per RTTmin. RTTmin is the minimum RTT observed for a given network path. As a consequence, the minimum ACK intensity in a QUIC connection can be given as follow:</t>
+			 <t>We set alpha = RTTmin/beta, which means sending beta ACKs per RTTmin. RTTmin is the minimum RTT observed for a given network path. As a consequence, the minimum ACK intensity in a QUIC connection can be given as follows:</t>
 
 			 <t>f_quic = min{bw/(L*max_packet_size), beta/RTTmin} (4)</t>
 
 
-			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected. Sara Landstrom et al. has given a lower bound of beta in <xref target="Sara" format="default"/>, i.e., beta >= 2. We have further given an upper bound of L, which can be derived according to the loss rate on the data path (plr_data) and the ack path   (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack). Where feedback_info denotes the amount of information carried by an ACK. The detailed derivation can be refered in <xref target="Tong" format="default"/>.</t>
+			 <t>where beta indicates the number of ACKs per RTT, and L indicates the number of full-sized data packets counted before sending an ACK. To minimize the ACK intensity, a smaller beta or a larger L is expected. Sara Landstrom et al. have given a lower bound of beta in <xref target="Sara" format="default"/>, i.e., beta >= 2. We have further given an upper bound of L, which can be derived according to the loss rate on the data path (plr_data) and the ack path (plr_ack), i.e., L &lt;= feedback_info/(plr_data*plr_ack). Where feedback_info denotes the amount of information carried by an ACK. The detailed derivation can be referred in <xref target="Tong" format="default"/>.</t>
 
-			 <t>Qualitatively, periodic ACK is applied when bandwidth-delay product (bdp) is large (i.e., bdp >= beta*L* max_packet_size), and byte-counting ACK is applied when bdp is small (i.e., bdp &lt; beta*L* max_packet_size).</t>
+			 <t>Qualitatively, periodic ACK is applied when the bandwidth-delay product (bdp) is large (i.e., bdp >= beta*L* max_packet_size), and byte-counting ACK is applied when bdp is small (i.e., bdp &lt; beta*L* max_packet_size).</t>
 
-			 <t>In terms of a transport with a large bdp, beta = 2 should be sufficient to ensure utilization, but the large bottleneck buffer   (i.e., one bdp) makes it necessary to acknowledge data more often. In general, the minimum send window (SWNDmin) can be roughly estimated as follow:</t>
+			 <t>In terms of transport with a large bdp, beta = 2 should be sufficient to ensure utilization, but the large bottleneck buffer   (i.e., one bdp) makes it necessary to acknowledge data more often. In general, the minimum send window (SWNDmin) can be roughly estimated as follows:</t>
 
              <t>SWNDmin = beta*bdp/(beta-1) (5)</t>
 
@@ -154,9 +154,9 @@
 
 		    <t>In this document, the RTTmin is the minimum RTT samples observed at the sender for a given network path during a period of time, and OWDmin is the minimum OWD samples observed on the same network path during a period of time. </t>
 
-        <t>An RTT estimation system contains a sender and a receiver. The sender can hardly generate per-packet RTT samples, which is the root cause of the minimum RTT estimation biases in the case of sending fewer ACKs. When multiple packets carrying departure timestamps are transported between endpoints via the same path , an RTT of this path can be sampled at the sender upon receiving an ACK frame.  However, when sending fewer ACK frames, more data packets might be received during the ACK interval, generating only one RTT sample among multiple packets is likely to result in biases.  For example, a larger minimum RTT estimate.  In general, the higher the throughput, the larger the biases.  One alternative way to reduce biases can be that, each ACK frame carries multiple timestamps (as well as ACK delays in <xref target="RFC9002"></xref>) for the sender to generate more RTT samples.  However, (1) the overhead is high, which is unacceptable especially for high-bandwidth transport.  Also, (2) the number of data packets might be far more than the maximum number of timestamps that an ACK frame is capable of carrying. Since the receiver is capable to monitor per-packet state, the one-way delay (OWD) of each packet can be easily computed according to the departure timestamps (carried in the packet) and the arrival timestamps of each packet.  In this case, QUIC SHOULD adopt the OWD-based RTTmin estimation.  The rationale is that the variation of OWD reflects the variation of RTT over near-symmetric links. The OWD-based RTTmin estimation requires the sender to record the departure timestamp in each ack-eliciting packet. Meanwhile, at the receiver, the per-packet OWD samples SHOULD be computed upon packet arrivals and a function of computing the minimum OWD SHOULD be newly added. The receiver then generates an ACK frame to the sender, in which the ACK delay and departure timestamp for the packet that achieves the minimum OWD is reported. The ACK delay is defined as the delay incurred between when the packet is received and when the ACK frame is sent. Based on the information reported by the incoming ACK frames and the ACK arrival timestamps, the sender can generate RTT samples and then compute RTTmin accordingly.</t>
+        <t>An RTT estimation system contains a sender and a receiver. The sender can hardly generate per-packet RTT samples, which is the root cause of the minimum RTT estimation biases in the case of sending fewer ACKs. When multiple packets carrying departure timestamps are transported between endpoints via the same path, an RTT of this path can be sampled at the sender upon receiving an ACK frame.  However, when sending fewer ACK frames, more data packets might be received during the ACK interval, generating only one RTT sample among multiple packets is likely to result in biases.  For example, a larger minimum RTT estimate.  In general, the higher the throughput, the larger the biases.  One alternative way to reduce biases can be that, each ACK frame carries multiple timestamps (as well as ACK delays in <xref target="RFC9002"></xref>) for the sender to generate more RTT samples.  However, (1) the overhead is high, which is unacceptable, especially for high-bandwidth transport.  Also, (2) the number of data packets might be far more than the maximum number of timestamps that an ACK frame is capable of carrying. Since the receiver is capable of monitoring per-packet state, the one-way delay (OWD) of each packet can be easily computed according to the departure timestamps (carried in the packet) and the arrival timestamps of each packet.  In this case, QUIC SHOULD adopt the OWD-based RTTmin estimation.  The rationale is that the variation of OWD reflects the variation of RTT over near-symmetric links. The OWD-based RTTmin estimation requires the sender to record the departure timestamp in each ack-eliciting packet. Meanwhile, at the receiver, the per-packet OWD samples SHOULD be computed upon packet arrivals and a function of computing the minimum OWD SHOULD be newly added. The receiver then generates an ACK frame for the sender, in which the ACK delay and departure timestamp for the packet that achieves the minimum OWD is reported. The ACK delay is defined as the delay incurred between when the packet is received and when the ACK frame is sent. Based on the information reported by the incoming ACK frames and the ACK arrival timestamps, the sender can generate RTT samples and then compute RTTmin accordingly.</t>
 
-      <t>In this document, RTTmin is used to update the ACK intensity. In general, RTTmin can also be used by other modules. For example, some congestion controllers depends on RTTmin to estimate the congestion window [Neal]. RTTmin is also used by QUIC loss detection to reject implausibly small rtt samples <xref target="RFC9002"></xref>.</t>
+      <t>In this document, RTTmin is used to update the ACK intensity. In general, RTTmin can also be used by other modules. For example, some congestion controllers depend on RTTmin to estimate the congestion window [Neal]. RTTmin is also used by QUIC loss detection to reject implausibly small rtt samples <xref target="RFC9002"></xref>.</t>
 
       </section>	
 
@@ -164,25 +164,25 @@
 
 		 <section title="Sender-Side Operation">
 		 
-		     <t>According to Formula (4), the run-time ACK intensity in QUIC are decided by bw, and RTTmin. Generally, the RTTmin and bw are calculated at the sender.</t>
+		     <t>According to Formula (4), the run-time ACK intensity in QUIC is decided by bw and RTTmin. Generally, the RTTmin and bw are calculated at the sender.</t>
 
-             <t> Before estimating the RTTmin, the RTT samples should be computed based on the ACK frames collected during a period of time. Assume that a packet is sent by the sender at time t_1 and arrives at time t_3, and the ACK frame is sent at time t_4. The ACK delay can be computed at the receiver. For example, the receiver computes the ACK delay delta_t = t_4 - t_3, and syncs the ACK delay to the sender via an ACK frame. The ACK delay can also be computed at the sender. For example, the receiver directly syncs an ACK frame carrying t_4 and t_3 to the sender, the sender then computes the ACK delay delta_t = t_4 - t_3. </t>
+             <t> Before estimating the RTTmin, the RTT samples should be computed based on the ACK frames collected during a period. Assume that a packet is sent by the sender at time t_1 and arrives at time t_3, and the ACK frame is sent at time t_4. The ACK delay can be computed at the receiver. For example, the receiver computes the ACK delay delta_t = t_4 - t_3, and syncs the ACK delay to the sender via an ACK frame. The ACK delay can also be computed at the sender. For example, the receiver directly syncs an ACK frame carrying t_4 and t_3 to the sender, the sender then computes the ACK delay delta_t = t_4 - t_3. </t>
 
-            <t> The sender therefore computes an RTT sample according to delta_t, t_1, and the arrival time (t_2) of the ACK frame, i.e., RTT_sample = t_2 − t_1 − delta_t. Measuring delta_t at the receiver assures an explicit correction for a more accurate RTT estimate. RTT samples SHOULD be smoothed using exponentially weighted moving average (EWMA) as specified in <xref target="RFC6298"/>. The sender then computes the RTTmin according to these RTT samples during a period of time.</t>
+            <t> The sender therefore computes an RTT sample according to delta_t, t_1, and the arrival time (t_2) of the ACK frame, i.e., RTT_sample = t_2 − t_1 − delta_t. Measuring delta_t at the receiver assures an explicit correction for a more accurate RTT estimate. RTT samples SHOULD be smoothed using exponentially weighted moving average (EWMA) as specified in <xref target="RFC6298"/>. The sender then computes the RTTmin according to these RTT samples during a period.</t>
 
-             <t>The bw estimation can be acquired in a similar manner to BBR <xref target="Neal" format="default"/>. Since minimizing the ACK intensity induces excessive ACK delay, the value of bw may be the average value over a long period of time. However, the biases introduced in ACK intensity computation is limited.</t>
+             <t>The bw estimation can be acquired similarly to BBR <xref target="Neal" format="default"/>. Since minimizing the ACK intensity induces excessive ACK delay, the value of bw may be the average value over a long period. However, the biases introduced in ACK intensity computation are limited.</t>
 
              <t>After computing the f_quic, the sender periodically syncs it to the receiver to update the intensity of ACK Frame by sending a new ACK-INTENSITY frame. </t>
 		 
-             <t>The sender SHOULD generate an ACK-INTENSITY frame on a regular basis. For example, when the change of f_quic exceeds a threshold, the ACK-INTENSITY frame should be sent to update the ACK intensity in time. The interval of ACK-INTENSITY frame can also be set according to the update window of RTTmin and bw.</t>
+             <t>The sender SHOULD generate an ACK-INTENSITY frame regularly. For example, when the change of f_quic exceeds a threshold, the ACK-INTENSITY frame should be sent to update the ACK intensity in time. The interval of ACK-INTENSITY frame can also be set according to the update window of RTTmin and bw.</t>
  	
 	     </section>
 
 		 <section title="Receiver-side Operation">
 		
-             <t>Currently, the QUIC receiver reports ACK delays for only the largest acknowledged packet in an ACK frame, hence an RTT sample is generated using only the largest acknowledged packet in the received ACK frame. For a more accurate RTTmin estimate when sending fewer ACK frames, QUIC SHOULD adopt the OWD-based RTTmin estimation. The OWD-based RTTmin estimation requires the QUIC receiver to filter the departure timestamp for the packet that achieves the minimum OWD during the interval between two ACK frames and report the ACK delay of this packet. Whether redefining the meaning of ACK delay or not, it depends on the negotiation between endpoints of the QUIC connection.</t>
+             <t>Currently, the QUIC receiver reports ACK delays for only the largest acknowledged packet in an ACK frame, hence an RTT sample is generated using only the largest acknowledged packet in the received ACK frame. For a more accurate RTTmin estimate when sending fewer ACK frames, QUIC SHOULD adopt the OWD-based RTTmin estimation. The OWD-based RTTmin estimation requires the QUIC receiver to filter the departure timestamp for the packet that achieves the minimum OWD during the interval between two ACK frames and report the ACK delay of this packet. Whether redefining the meaning of ACK delay or not, depends on the negotiation between endpoints of the QUIC connection.</t>
 
-             <t>Upon packet arrivals, the receiver is capable to generate per-packet OWD samples according to the difference between packet departure timestamp and packet arrival timestamp. The receiver then computes the minimum OWD by comparing the per-packet OWD samples. The OWD estimation does not require clock synchronization here because the relative values are adopted.</t>
+             <t>Upon packet arrivals, the receiver is capable of generating per-packet OWD samples according to the difference between the packet departure timestamp and packet arrival timestamp. The receiver then computes the minimum OWD by comparing the per-packet OWD samples. The OWD estimation does not require clock synchronization here because the relative values are adopted.</t>
 
              <t> Afterwards, based on the ACK delay and the departure timestamp corresponding to the packet that achieves the minimum OWD, the sender calculates the RTT of this packet as a minimum RTT sample. Ultimately, the minimum RTT is computed according to these minimum RTT samples. </t>
 
@@ -201,9 +201,9 @@
 		
 			 <section title="Transport Parameter: ack-intensity-support ">
 			
-			     <t>A new field named ack-intensity-support should be added for negotiation between both parties whether starting the dynamic ACK intensity function in QUIC connection. The endpoints sends this parameter during handshakes. Only when both parties agree, ACK intensity refreshment can be adopted.</t>
+			     <t>A new field named ack-intensity-support should be added for negotiation between both parties on whether to start the dynamic ACK intensity function in QUIC connection. The endpoints send this parameter during handshakes. Only when both parties agree, ACK intensity refreshment can be adopted.</t>
 
-                 <t>ack-intensity-support (0x XX):This parameter has two values (0 or 1) specifying whether the sending endpoint is willing to adopt ACK intensity refreshment. When the value is set as 1, it means that the sending endpoint want to start ACK intensity refreshment during connection. When the value is set as 0, it means that the sending endpoint does not support this function.</t>
+                 <t>ack-intensity-support (0x XX): This parameter has two values (0 or 1) specifying whether the sending endpoint is willing to adopt ACK intensity refreshment. When the value is set as 1, it means that the sending endpoint wants to start ACK intensity refreshment during connection. When the value is set as 0, it means that the sending endpoint does not support this function.</t>
 
 	     </section>
 			
@@ -228,7 +228,7 @@
 				 <t>Sequence Number: A variable-length integer indicating the sequence number assigned to the ACK-INTENSITY frame by the sender.</t>
                  <t>ACK Intensity: A variable-length integer indicating the updated f_quic calculated by the sender.</t>
                  <t>ACK-INTENSITY frames are ack-eliciting. However, their loss does not require retransmission.</t>              
-				 <t>ACK-INTENSITY frames SHOULD be generated by the sender during a connection to notify the receiver the variation of ACK intensity requirement under network dynamics. In general, a sender MAY send an ACK-INTENSITY frame every 10 seconds (to handle route
+				 <t>ACK-INTENSITY frames SHOULD be generated by the sender during a connection to notify the receiver of the variation of ACK intensity requirement under network dynamics. In general, a sender MAY send an ACK-INTENSITY frame every 10 seconds (to handle route
 changes). </t>	     	
 	    </section>	
 
@@ -254,7 +254,7 @@ changes). </t>
 
 	<section title="ACK Delay Redefinition">
  
-             <t>The ACK Delay field is carried in the ACK Frame. Currently, the QUIC receiver reports ACK delays for only the largest acknowledged packet in an ACK frame, hence an RTT sample is generated using only the largest acknowledged packet in the received ACK frame. For a more accurate RTTmin estimate when sending fewer ACK frames, QUIC SHOULD adopt the OWD-based RTTmin estimation. The OWD-based RTTmin estimation requires the QUIC receiver to filter the departure timestamp for the packet that achieves the minimum OWD during the interval between two ACK frames and report the ACK delay of this packet. Whether redefining the meaning of ACK delay or not, it depends on the negotiation between endpoints of the QUIC connection.</t>
+             <t>The ACK Delay field is carried in the ACK Frame. Currently, the QUIC receiver reports ACK delays for only the largest acknowledged packet in an ACK frame, hence an RTT sample is generated using only the largest acknowledged packet in the received ACK frame. For a more accurate RTTmin estimate when sending fewer ACK frames, QUIC SHOULD adopt the OWD-based RTTmin estimation. The OWD-based RTTmin estimation requires the QUIC receiver to filter the departure timestamp for the packet that achieves the minimum OWD during the interval between two ACK frames and report the ACK delay of this packet. Whether redefining the meaning of ACK delay or not, depends on the negotiation between endpoints of the QUIC connection.</t>
 
             <t>In other words, QUIC SHOULD change the way of computing ACK Delay according to the arrival timestamp of the packet with minimum OWD instead of the arrival timestamp of the largest acknowledged packet.</t>
 
@@ -269,7 +269,7 @@ changes). </t>
 	</section>
 	
 	<section title="IANA Considerations">
-	    <t>The value for ack-intensity-support transport parameter and ACK-INTENSITY frame should be allocated.</t>	
+	    <t>The value for the ack-intensity-support transport parameter and ACK-INTENSITY frame should be allocated.</t>	
 	</section>
 		
   </middle>
@@ -406,7 +406,7 @@ changes). </t>
 
         	<reference anchor="IYENGAR-ACK">
           <front>
-            <title>Sender Control of acknowledgment Delays in QUIC</title>           
+            <title>Sender Control of Acknowledgment Delays in QUIC</title>           
             <author initials="J." surname="Iyengar" fullname="Jana Iyengar" role="editor">
               <organization>Fastly</organization>
             </author>
